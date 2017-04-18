@@ -2,25 +2,38 @@
 
 # Patch Config to enable Event Handler
 CFG_EVENT='/root/janus/etc/janus/janus.eventhandler.sampleevh.cfg'
-sed 's/enabled = no/enabled = yes/1' -i $CFG_EVENT
-echo 'backend = http://localhost:7777' >> $CFG_EVENT
+# sed 's/enabled = no/enabled = yes/1' -i $CFG_EVENT
+# echo 'backend = http://localhost:7777' >> $CFG_EVENT
 CFG_JANUS='/root/janus/etc/janus/janus.cfg'
 sed 's/; broadcast = yes/broadcast = yes/1' -i $CFG_JANUS
 CFG_HTTPS='/root/janus/etc/janus/janus.transport.http.cfg'
 sed 's/https = no/https = yes/1' -i $CFG_HTTPS
 sed 's/;secure_port = 8889/secure_port = 8889/1' -i $CFG_HTTPS
 
-# Generate Certs
-openssl req -x509 -newkey rsa:4086 \
-  -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=localhost" \
-  -keyout "/usr/share/key.pem" \
-  -out "/usr/share/cert.pem" \
-  -days 3650 -nodes -sha256
+if [ -d "/etc/letsencrypt/production/certs" ]; then
+    cp /etc/letsencrypt/production/certs/*/fullchain.pem /root/janus/share/janus/certs/mycert.pem
+    cp /etc/letsencrypt/production/certs/*/privkey.pem /root/janus/share/janus/certs/mycert.key
+    # Start demo server
+    npm install http-server -g
+    ln -s /usr/bin/nodejs /usr/bin/node
+    http-server /root/jangouts/ --key /root/janus/share/janus/certs/mycert.key \
+      --cert /root/janus/share/janus/certs/mycert.pem -d false -p 8080 -c-1 --ssl &
+else 
+    # Generate Certs
+    openssl req -x509 -newkey rsa:4086 \
+      -subj "/C=XX/ST=XXXX/L=XXXX/O=XXXX/CN=localhost" \
+      -keyout "/usr/share/key.pem" \
+      -out "/usr/share/cert.pem" \
+      -days 3650 -nodes -sha256
 
-# Start demo server
-npm install http-server -g
-ln -s /usr/bin/nodejs /usr/bin/node
-http-server /root/jangouts/ --key /usr/share/key.pem --cert /usr/share/cert.pem -d false -p 8080 -c-1 --ssl &
+    cp /usr/share/cert.pem /root/janus/share/janus/certs/mycert.pem
+    cp /usr/share/key.pem /root/janus/share/janus/certs/mycert.key
+    # Start demo server
+    npm install http-server -g
+    ln -s /usr/bin/nodejs /usr/bin/node
+    http-server /root/jangouts/ --key /usr/share/key.pem \
+      --cert /usr/share/cert.pem -d false -p 8080 -c-1 --ssl &
+fi
 
 # Start Evapi Demo
 # npm install http -g
