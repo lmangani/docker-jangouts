@@ -10,6 +10,15 @@ CFG_HTTPS='/root/janus/etc/janus/janus.transport.http.cfg'
 sed 's/https = no/https = yes/1' -i $CFG_HTTPS
 sed 's/;secure_port = 8889/secure_port = 8889/1' -i $CFG_HTTPS
 
+CFG_JANGOUTS='/root/jangouts/config.json'
+if [ -n "$DOMAIN_NAME" ]
+    if [ -n "$PUBLIC_PORT" ]
+        sed 's|\"janusServerSSL\": null,|\"janusServerSSL\": \"https:\/\/$DOMAIN_NAME:$PUBLIC_PORT/janus\",|' -i $CFG_JANGOUTS
+    else
+        sed 's|\"janusServerSSL\": null,|\"janusServerSSL\": \"https:\/\/$DOMAIN_NAME/janus\",|' -i $CFG_JANGOUTS
+    fi
+fi
+
 if [ -d "/etc/letsencrypt/production/certs" ]; then
     cp /etc/letsencrypt/production/certs/*/fullchain.pem /root/janus/share/janus/certs/mycert.pem
     cp /etc/letsencrypt/production/certs/*/privkey.pem /root/janus/share/janus/certs/mycert.key
