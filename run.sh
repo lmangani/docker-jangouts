@@ -11,8 +11,8 @@ sed 's/https = no/https = yes/1' -i $CFG_HTTPS
 sed 's/;secure_port = 8889/secure_port = 8889/1' -i $CFG_HTTPS
 
 CFG_JANGOUTS='/root/jangouts/config.json'
-if [ -n "$DOMAIN_NAME" ]
-    if [ -n "$PUBLIC_PORT" ]
+if [ -n "$DOMAIN_NAME" ]; then
+    if [ -n "$PUBLIC_PORT" ]; then
         sed 's|\"janusServerSSL\": null,|\"janusServerSSL\": \"https:\/\/$DOMAIN_NAME:$PUBLIC_PORT/janus\",|' -i $CFG_JANGOUTS
     else
         sed 's|\"janusServerSSL\": null,|\"janusServerSSL\": \"https:\/\/$DOMAIN_NAME/janus\",|' -i $CFG_JANGOUTS
