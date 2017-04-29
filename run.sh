@@ -1,14 +1,17 @@
 #!/bin/bash
 
-# Patch Config to enable Event Handler
-CFG_EVENT='/root/janus/etc/janus/janus.eventhandler.sampleevh.cfg'
-# sed 's/enabled = no/enabled = yes/1' -i $CFG_EVENT
-# echo 'backend = http://localhost:7777' >> $CFG_EVENT
 CFG_JANUS='/root/janus/etc/janus/janus.cfg'
 sed 's/; broadcast = yes/broadcast = yes/1' -i $CFG_JANUS
 CFG_HTTPS='/root/janus/etc/janus/janus.transport.http.cfg'
 sed 's/https = no/https = yes/1' -i $CFG_HTTPS
 sed 's/;secure_port = 8889/secure_port = 8889/1' -i $CFG_HTTPS
+
+if [ -n "$EVAPI_URL" ]; then
+    # Patch Config to enable Event Handler
+    CFG_EVENT='/root/janus/etc/janus/janus.eventhandler.sampleevh.cfg'
+    sed 's/enabled = no/enabled = yes/1' -i $CFG_EVENT
+    echo "backend = $EVAPI_URL" >> $CFG_EVENT
+fi
 
 CFG_JANGOUTS='/root/jangouts/config.json'
 if [ -n "$DOMAIN_NAME" ]; then
@@ -44,12 +47,13 @@ else
       --cert /usr/share/cert.pem -d false -p 8080 -c-1 --ssl &
 fi
 
-# Start Evapi Demo
-# npm install http -g
-# nodejs /evapi.js >> /var/log/meetecho &
 
+if [ -n "$PORT_RANGE" ]; then
+  CMD="/root/janus/bin/janus --stun-server=stun.l.google.com:19302 -L /var/log/meetecho --rtp-port-range=$PORT_RANGE"
+else 
+  CMD="/root/janus/bin/janus --stun-server=stun.l.google.com:19302 -L /var/log/meetecho --rtp-port-range=10000-10200"
+fi
 # Start Janus Gateway in forever mode
-CMD="/root/janus/bin/janus --stun-server=stun.l.google.com:19302 -L /var/log/meetecho --rtp-port-range=10000-10200"
 until $CMD
 do
     :
