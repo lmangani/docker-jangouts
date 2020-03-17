@@ -32,7 +32,7 @@ RUN apt-get -y update && apt-get install -y libmicrohttpd-dev \
   npm \
   nano
 
-RUN cd /tmp && wget https://github.com/jangouts/jangouts/archive/v0.4.5.tar.gz && tar zxvf v0.4.5.tar.gz && rm -rf v0.4.5.tar.gz && mv jangouts-0.4.5/dist /root/jangouts
+RUN cd /tmp && wget https://github.com/jangouts/jangouts/archive/v0.4.7.tar.gz && tar zxvf v0.4.7.tar.gz && rm -rf v0.4.7.tar.gz && mv jangouts-0.4.7/dist /root/jangouts
 
 ADD scripts/bootstrap.sh $SCRIPTS_PATH/
 RUN $SCRIPTS_PATH/bootstrap.sh
